@@ -1,0 +1,3 @@
+[submodule "Robinhood"]
+	path = Robinhood
+	url = git@github.com:Jamonek/Robinhood.git
