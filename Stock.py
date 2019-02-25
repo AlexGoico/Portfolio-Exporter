@@ -1,7 +1,10 @@
 class Stock:
-  def __init__(self, ticker, equity, avg_cost, quantity, percentage):
+  def __init__(self, ticker, quoted_equity, quote_datetime, avg_cost, quantity):
     self.ticker = ticker
-    self.equity = equity
+    self.quoted_equity = quoted_equity
+    self.quote_datetime = quote_datetime.isoformat()
     self.avg_cost = avg_cost
     self.quantity = quantity
-    self.rh_port_percentage = percentage
+
+  def __repr__(self):
+    pass
