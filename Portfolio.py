@@ -25,3 +25,6 @@ class Portfolio:
       ret['stocks'].append(stock_dict)
 
     return ret
+
+  def __repr__(self):
+    return f"Portfolio({self.total_equity}, {self.total_avg_cost}, {self.stocks})"

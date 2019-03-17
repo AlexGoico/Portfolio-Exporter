@@ -1,12 +1,18 @@
 from Robinhood import Robinhood
 import os
-import time
-from random import uniform
 import csv, json
-import dateutil.parser as dateparser
 
 from Stock import Stock
 from Portfolio import Portfolio
+
+
+def quote_endpoint(securities):
+  return f'https://api.robinhood.com/marketdata/quotes/?instruments=' \
+    f'{",".join([security["instrument"] for security in securities])}'
+
+
+class LoginException(Exception):
+  pass
 
 
 def csv_export(filename):
@@ -34,33 +40,28 @@ def json_export(filename):
 
 
 class RobinhoodExporter:
+  """
+  Exports metadata about a Robinhood user's held securities and portfolio.
+  """
   def __init__(self, mfa_code):
     username = os.environ['rh_user']
     password = os.environ['rh_pass']
 
     self.rh = Robinhood()
     if not self.rh.login(username, password, mfa_code):
-      raise Error("Invalid login credentials.")
+      raise LoginException("Invalid login credentials.")
 
-  def _stock_from_security(self, security):
-    stock = self.rh.get_url(security['instrument'])
-    quote = self.rh.get_url(stock['quote'])
+  def _securities_to_quotes(self, securities):
+    return self.rh.get_url(quote_endpoint(securities))['results']
 
-    ticker          = stock['symbol']
-    quoted_equity   = round(float(quote['last_trade_price']), 2)
-    quoted_datetime = dateparser.parse(quote['updated_at'])
-    avg_cost        = round(float(security['average_buy_price']), 2)
-    quantity        = round(float(security['quantity']), 2)
+  def _stocks_from_securities(self, securities):
+    for security, quote in zip(securities, self._securities_to_quotes(securities)):
+      yield Stock.from_security_and_quote(security, quote)
 
-    return Stock(ticker, quoted_equity, quoted_datetime, avg_cost, quantity)
-  
   def export_portfolio(self, export_func=None):
     securities = self.rh.securities_owned()
 
-    stocks = []
-    for security in securities['results']:
-      stocks.append(self._stock_from_security(security))
-      time.sleep(uniform(0.5, 2))
+    stocks = list(self._stocks_from_securities(securities['results']))
 
     total_equity = self.rh.equity()
     portfolio = Portfolio(total_equity, stocks)
