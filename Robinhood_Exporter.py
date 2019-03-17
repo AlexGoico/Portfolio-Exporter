@@ -43,12 +43,16 @@ class RobinhoodExporter:
   """
   Exports metadata about a Robinhood user's held securities and portfolio.
   """
-  def __init__(self, mfa_code):
-    username = os.environ['rh_user']
-    password = os.environ['rh_pass']
 
-    self.rh = Robinhood()
-    if not self.rh.login(username, password, mfa_code):
+  def __init__(self, mfa_code, username=None, password=None):
+    username = os.environ['rh_user'] if None else username
+    password = os.environ['rh_pass'] if None else password
+
+    try:
+      self.rh = Robinhood()
+      if not self.rh.login(username, password, mfa_code):
+        raise LoginException("Invalid login credentials.")
+    except:
       raise LoginException("Invalid login credentials.")
 
   def _securities_to_quotes(self, securities):
