@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 
-from Robinhood_Exporter import RobinhoodExporter, LoginException
+from Portfolio_Exporter.Robinhood_Exporter import RobinhoodExporter, LoginException
 
 app = Flask(__name__)
 

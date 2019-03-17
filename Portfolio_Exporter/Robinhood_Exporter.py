@@ -2,8 +2,8 @@ from Robinhood import Robinhood
 import os
 import csv, json
 
-from Stock import Stock
-from Portfolio import Portfolio
+from Portfolio_Exporter.Stock import Stock
+from Portfolio_Exporter.Portfolio import Portfolio
 
 
 def quote_endpoint(securities):
@@ -15,10 +15,11 @@ class LoginException(Exception):
   pass
 
 
-def csv_export(filename):
+def csv_export(path):
+  os.makedirs(os.path.dirname(path), exist_ok=True)
   def export(portfolio):
     stocks = portfolio.as_dicts()['stocks']
-    with open(filename, 'w') as f:
+    with open(path, 'w') as f:
       if len(stocks) == 0:
         return
 
@@ -30,10 +31,11 @@ def csv_export(filename):
   return export
 
 
-def json_export(filename):
+def json_export(path):
+  os.makedirs(os.path.dirname(path), exist_ok=True)
   def export(portfolio):
     stocks = portfolio.as_dicts()['stocks']
-    with open(filename, 'w') as f:
+    with open(path, 'w') as f:
       f.write(json.dumps(stocks, indent=2))
 
   return export
@@ -45,8 +47,8 @@ class RobinhoodExporter:
   """
 
   def __init__(self, mfa_code, username=None, password=None):
-    username = os.environ['rh_user'] if None else username
-    password = os.environ['rh_pass'] if None else password
+    username = os.environ['rh_user'] if not username else username
+    password = os.environ['rh_pass'] if not password else password
 
     try:
       self.rh = Robinhood()
